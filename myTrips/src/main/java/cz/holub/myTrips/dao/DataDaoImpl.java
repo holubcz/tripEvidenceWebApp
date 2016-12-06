@@ -45,6 +45,7 @@ public class DataDaoImpl implements DataDao {
 		return res;
 	}
 
+	
 	@Override
 	public Trip getTripById(String id) throws Exception {
 		session = sessionFactory.openSession();
@@ -55,6 +56,7 @@ public class DataDaoImpl implements DataDao {
 		return trip;
 	}
 
+	
 	@Override
 	public List getTripList() throws Exception {
 		session = sessionFactory.openSession();
@@ -65,6 +67,7 @@ public class DataDaoImpl implements DataDao {
 		return tripList;
 	}
 
+	
 	@Override
 	public boolean deleteTrip(String id) throws Exception {
 		boolean res = false;
@@ -80,6 +83,7 @@ public class DataDaoImpl implements DataDao {
 		return res;
 	}
 
+	
 	@Override
 	public boolean isBannedWord(String word) {
 		Query query = session.createQuery("Select 1 from BannedWord t where t.word = :exId");
@@ -88,6 +92,7 @@ public class DataDaoImpl implements DataDao {
 		return exists;
 	}
 
+	
 	@Override
 	public boolean existsIdInDb(String id) {
 		// session = sessionFactory.openSession();
@@ -100,6 +105,7 @@ public class DataDaoImpl implements DataDao {
 		return exists;
 	}
 
+	
 	@Override
 	public Status updateTrip(Trip trip) throws Exception {
 		session = sessionFactory.openSession();
@@ -111,9 +117,9 @@ public class DataDaoImpl implements DataDao {
 		return new Status(Status.STATUS_SUCCESFULL, "", trip.getId());
 	}
 
+	
 	@Override
-	public List getTripListByKeyWords(List<String> keyWords) throws Exception {
-		
+	public List getTripListByKeyWords(List<String> keyWords) throws Exception {	
 		Set<Trip> resSet= new LinkedHashSet<Trip>();
 		session = sessionFactory.openSession();
 		tx = session.getTransaction();
