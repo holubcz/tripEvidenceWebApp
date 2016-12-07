@@ -28,6 +28,8 @@
 				<value>cz.holub.myTrips.domain.Tag</value>
 				<value>cz.holub.myTrips.domain.GPSPoint</value>
 				<value>cz.holub.myTrips.domain.BannedWord</value>
+				<value>cz.holub.myTrips.domain.User</value>
+				<value>cz.holub.myTrips.domain.FavouriteTrip</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
