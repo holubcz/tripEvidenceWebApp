@@ -22,7 +22,7 @@ public class GPSPoint implements Serializable{
 
 	@Id
 	@Column(name = "pointOrder", nullable= false)
-	private int pointOrder;
+	private Integer pointOrder;
 	
 	@Column(name = "lat", precision=10, scale=6)
 	private BigDecimal lat;
@@ -30,6 +30,8 @@ public class GPSPoint implements Serializable{
 	@Column(name = "lng", precision=10, scale=6)
 	private BigDecimal lng;
 
+	
+	
 	public String getTripId() {
 		return tripId;
 	}
@@ -38,11 +40,11 @@ public class GPSPoint implements Serializable{
 		this.tripId = tripId;
 	}
 
-	public int getPointOrder() {
+	public Integer getPointOrder() {
 		return pointOrder;
 	}
 
-	public void setPointOrder(int pointOrder) {
+	public void setPointOrder(Integer pointOrder) {
 		this.pointOrder = pointOrder;
 	}
 
