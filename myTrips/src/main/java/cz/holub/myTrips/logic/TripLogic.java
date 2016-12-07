@@ -11,6 +11,7 @@ import cz.holub.myTrips.dao.DataDao;
 import cz.holub.myTrips.domain.GPSPoint;
 import cz.holub.myTrips.domain.Tag;
 import cz.holub.myTrips.domain.Trip;
+import cz.holub.myTrips.serviceTools.Status;
 
 public class TripLogic {
 	static final int INITIAL_ID_LEN=8;
