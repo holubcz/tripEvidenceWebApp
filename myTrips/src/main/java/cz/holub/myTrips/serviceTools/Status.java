@@ -1,4 +1,4 @@
-package cz.holub.myTrips.logic;
+package cz.holub.myTrips.serviceTools;
 
 
 public class Status {
