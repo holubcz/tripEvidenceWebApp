@@ -3,6 +3,7 @@ package cz.holub.myTrips.dao;
 import java.util.List;
 
 import cz.holub.myTrips.domain.Trip;
+import cz.holub.myTrips.domain.User;
 import cz.holub.myTrips.serviceTools.Status;
 
 public interface DataDao {
@@ -64,7 +65,7 @@ public interface DataDao {
 	 * @param id
 	 * @return
 	 */
-	public boolean existsIdInDb(String id);
+	public boolean existsTripIdInDb(String id);
 	
 	/**
 	 * Ovìøí zda je slovo v seznamu zakázaných slov
@@ -72,4 +73,29 @@ public interface DataDao {
 	 * @return
 	 */
 	public boolean isBannedWord(String word);
+	
+	
+	/**
+	 * Ovìøí zda uživatel existuje v databázi
+	 * @param user
+	 * @return
+	 */
+	public boolean existsUserInDB(User user);
+	
+	/**
+	 * Pøidá uživatele do databáze.
+	 * Pøed pøidáním ovìøí zda uživatel existuje. Pokud ano vrátí status s chybou, pokud ne zahashuje heslo a záznam uloží do db
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public Status addUser(User user) throws Exception;
+
+	/**
+	 * Získá uživatele z databáze pokud existuje
+	 * @param userName
+	 * @return Objekt User pokud byl nalezen jinak null
+	 * @throws Exception
+	 */
+	public User getUser(String userName) throws Exception;
 }

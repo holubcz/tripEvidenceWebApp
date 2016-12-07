@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.holub.myTrips.dao.DataDao;
 import cz.holub.myTrips.domain.Trip;
+import cz.holub.myTrips.domain.User;
+import cz.holub.myTrips.logic.UserLogic;
+import cz.holub.myTrips.serviceTools.AuthenticatedUser;
+import cz.holub.myTrips.serviceTools.Login;
 import cz.holub.myTrips.serviceTools.Status;
 
 @RestController
@@ -20,6 +24,11 @@ public class MyTripController {
 	@Autowired
 	DataDao dataDao;
 
+	@Autowired
+	UserLogic userLogic;
+	
+	AuthenticatedUser authenticatedUser;
+	
 	@RequestMapping(value = "/trips", method = RequestMethod.GET, headers = "Accept=application/json")
 	public List<Trip> getTrips() {
 		List<Trip> listOfTrips = null;
@@ -108,4 +117,39 @@ public class MyTripController {
 		return listOfTrips;
 	}
 
+	@RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")
+	public Status addUser(@RequestBody User user) {
+		Status res;
+		try {
+			res= dataDao.addUser(user);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			res= new Status();
+			res.setCode(Status.STATUS_EROR);
+			res.setMessage("Selhalo pridani uživatele. Vyvolana vyjimka.");
+		}
+		return res;
+	}
+
+	@RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
+	public Status authenticateUser(@RequestBody Login login) {
+		Status res= new Status();
+		try {
+			if (userLogic.authenticateUser(login.getUserName(), login.getPassword())) {
+				if (authenticatedUser == null) {
+					authenticatedUser= new AuthenticatedUser();
+				}
+				authenticatedUser.setUserName(login.getUserName());
+				res.setCode(Status.STATUS_SUCCESFULL);
+				res.setMessage("Uživatel " + login.getUserName() + " byl autentizován");
+			} else {
+				res.setCode(Status.STATUS_EROR);
+				res.setMessage("Uživatel "+ login.getUserName() + " nebyl autentizován");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
 }

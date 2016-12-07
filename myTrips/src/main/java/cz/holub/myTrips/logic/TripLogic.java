@@ -50,7 +50,7 @@ public class TripLogic {
 		String id = null;
 		do {
 			id = generateTripId(INITIAL_ID_LEN);
-		} while (dataDao.existsIdInDb(id));
+		} while (dataDao.existsTripIdInDb(id));
 		return id;
 	}
 	

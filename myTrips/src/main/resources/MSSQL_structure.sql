@@ -49,7 +49,7 @@ CREATE TABLE [dbo].[Trips](
 	[id] [varchar](10) NOT NULL,
 	[name] [varchar](50) NULL,
 	[description] [varchar](255) NULL,
-	[lenght] [decimal](10, 6) NULL
+	[lenght] [decimal](20, 6) NULL
 ) ON [PRIMARY]
 
 GO
@@ -59,8 +59,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Users](
-	[login] [varchar](20) NOT NULL,
-	[passwd] [varchar](20) NOT NULL
+	[userName] [varchar](10) NOT NULL,
+	[password] [varchar](60) NULL,
+	[email] [varchar](50) NULL
 ) ON [PRIMARY]
 
 GO

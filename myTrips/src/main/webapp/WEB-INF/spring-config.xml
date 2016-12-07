@@ -52,4 +52,5 @@
 <!-- 	<bean id="dataServices" class="cz.holub.myTrips.services.DataServicesImpl"></bean> -->
 	<bean id="tripLogic" class="cz.holub.myTrips.logic.TripLogic"></bean>
 	<bean id="tagLogic" class="cz.holub.myTrips.logic.TagLogic"></bean>
+	<bean id="userLogic" class="cz.holub.myTrips.logic.UserLogic"></bean>
 </beans>

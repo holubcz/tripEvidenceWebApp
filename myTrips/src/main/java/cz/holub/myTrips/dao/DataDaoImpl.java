@@ -12,7 +12,9 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cz.holub.myTrips.domain.Trip;
+import cz.holub.myTrips.domain.User;
 import cz.holub.myTrips.logic.TripLogic;
+import cz.holub.myTrips.logic.UserLogic;
 import cz.holub.myTrips.serviceTools.Status;
 
 public class DataDaoImpl implements DataDao {
@@ -21,6 +23,9 @@ public class DataDaoImpl implements DataDao {
 
 	@Autowired
 	TripLogic tripLogic;
+	
+	@Autowired
+	UserLogic userLogic;
 
 	Session session = null;
 	Transaction tx = null;
@@ -44,13 +49,6 @@ public class DataDaoImpl implements DataDao {
 		tripLogic.calculateTripLenInThread(trip);
 		return res;
 	}
-	/*
-	public void test() {
-		String password = "plaintextPassword";
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String hashedPassword = passwordEncoder.encode(password);
-	}
-	 */
 	
 	@Override
 	public Trip getTripById(String id) throws Exception {
@@ -101,8 +99,8 @@ public class DataDaoImpl implements DataDao {
 
 	
 	@Override
-	public boolean existsIdInDb(String id) {
-		// session = sessionFactory.openSession();
+	public boolean existsTripIdInDb(String id) {
+		session = sessionFactory.openSession();
 		Query query = session.createQuery("Select 1 from Trip t where t.id = :exId");
 		query.setString("exId", id);
 		// tx = session.getTransaction();
@@ -149,5 +147,47 @@ public class DataDaoImpl implements DataDao {
 		}
 		tx.commit();
 		return new ArrayList<Trip>(resSet);
+	}
+
+	@Override
+	public User getUser(String userName) throws Exception {
+		session = sessionFactory.openSession();
+		User user= (User) session.load(User.class, userName);
+		tx = session.getTransaction();
+		session.beginTransaction();
+		tx.commit();
+		return user;
+	}
+
+	@Override
+	public boolean existsUserInDB(User user) {
+		if ((user == null) || (user.getUserName() == null) || ("".equals(user.getUserName().trim()))) {
+			return false;
+		}
+		session = sessionFactory.openSession();
+		Query query = session.createQuery("Select 1 from User t where t.userName = :exUsername");
+		query.setString("exUsername", user.getUserName());
+		boolean exists = (query.uniqueResult() != null);
+		return exists;
+	}
+	
+	@Override
+	public Status addUser(User user) throws Exception {
+		if ((user == null) || (user.getUserName() == null) || ("".equals(user.getUserName().trim()))) {
+			return new Status(Status.STATUS_EROR, "Neplatny uzivatel", null);
+		}
+		if (existsUserInDB(user)) {
+			return new Status(Status.STATUS_EROR, "Uzivatel jiz v databazi existuje", null);
+		}
+		String encryptedPassword= userLogic.encryptPassword(user.getPassword());
+		user.setPassword(encryptedPassword);
+		
+		session = sessionFactory.openSession();
+		tx = session.beginTransaction();
+		session.save(user);
+		tx.commit();
+		session.close();
+		
+		return new Status(Status.STATUS_SUCCESFULL, "Uzivatel byl pridan do databaze. ", null);
 	}
 }
