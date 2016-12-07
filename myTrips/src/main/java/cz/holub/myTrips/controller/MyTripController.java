@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.holub.myTrips.dao.DataDao;
 import cz.holub.myTrips.domain.Trip;
-import cz.holub.myTrips.logic.Status;
+import cz.holub.myTrips.serviceTools.Status;
 
 @RestController
 public class MyTripController {
@@ -24,7 +24,7 @@ public class MyTripController {
 	public List<Trip> getTrips() {
 		List<Trip> listOfTrips = null;
 		try {
-			listOfTrips  = dataDao.getTripList();
+			listOfTrips = (List<Trip>)dataDao.getTripList();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
