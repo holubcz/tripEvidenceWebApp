@@ -27,16 +27,16 @@ public class Trip implements Serializable {
 
 	// @GeneratedValue
 	@Id
-	@Column(name = "id")
+	@Column(name = "id", length = 10, nullable= false, updatable= false)
 	String id;
 
-	@Column(name = "name")
+	@Column(name = "name", length = 50)
 	String name;
 
-	@Column(name = "description")
+	@Column(name = "description", length = 255)
 	String description;
 
-	@Column(name = "lenght", precision=10, scale=6)
+	@Column(name = "lenght", precision=20, scale=6)
 	BigDecimal lenght;
 
 	@LazyCollection(LazyCollectionOption.FALSE)

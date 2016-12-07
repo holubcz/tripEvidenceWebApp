@@ -16,14 +16,14 @@ public class Tag implements Serializable {
 	private static final long serialVersionUID = -1504019397884331704L;
 
 	@Id
-	@Column(name = "tripId", nullable= false)
+	@Column(name = "tripId", length = 10, nullable= false, updatable= false)
 	private String tripId;
 
 	@Id
 	@Column(name = "tagOrder", nullable= false)
-	private int tagOrder;
+	private Integer tagOrder;
 
-	@Column(name = "tag")
+	@Column(name = "tag", length = 100)
 	private String tag;
 
 //	@ManyToOne(fetch = FetchType.LAZY)
@@ -38,11 +38,11 @@ public class Tag implements Serializable {
 		this.tripId = tripId;
 	}
 
-	public int getTagOrder() {
+	public Integer getTagOrder() {
 		return tagOrder;
 	}
 
-	public void setTagOrder(int order) {
+	public void setTagOrder(Integer order) {
 		this.tagOrder = order;
 	}
 
