@@ -3,7 +3,7 @@ package cz.holub.myTrips.dao;
 import java.util.List;
 
 import cz.holub.myTrips.domain.Trip;
-import cz.holub.myTrips.logic.Status;
+import cz.holub.myTrips.serviceTools.Status;
 
 public interface DataDao {
 	/**
@@ -39,7 +39,7 @@ public interface DataDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public List getTripList() throws Exception;
+	public List<Trip> getTripList() throws Exception;
 
 	/**
 	 * Dohledá záznamy na základì klíèových slov 
@@ -49,7 +49,7 @@ public interface DataDao {
 	 * @return nalezený seznam bez duplicit
 	 * @throws Exception
 	 */
-	public List getTripListByKeyWords(List<String> keyWords) throws Exception;
+	public List<Trip> getTripListByKeyWords(List<String> keyWords) throws Exception;
 
 	/**
 	 * smaže zvolený trip z DB

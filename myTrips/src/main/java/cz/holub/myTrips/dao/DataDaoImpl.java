@@ -12,8 +12,8 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cz.holub.myTrips.domain.Trip;
-import cz.holub.myTrips.logic.Status;
 import cz.holub.myTrips.logic.TripLogic;
+import cz.holub.myTrips.serviceTools.Status;
 
 public class DataDaoImpl implements DataDao {
 	@Autowired
@@ -44,7 +44,13 @@ public class DataDaoImpl implements DataDao {
 		tripLogic.calculateTripLenInThread(trip);
 		return res;
 	}
-
+	/*
+	public void test() {
+		String password = "plaintextPassword";
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String hashedPassword = passwordEncoder.encode(password);
+	}
+	 */
 	
 	@Override
 	public Trip getTripById(String id) throws Exception {
@@ -57,11 +63,12 @@ public class DataDaoImpl implements DataDao {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public List getTripList() throws Exception {
+	public List<Trip> getTripList() throws Exception {
 		session = sessionFactory.openSession();
 		tx = session.beginTransaction();
-		List tripList = session.createCriteria(Trip.class).list();
+		List<Trip> tripList = session.createCriteria(Trip.class).list();
 		tx.commit();
 		session.close();
 		return tripList;
@@ -118,8 +125,9 @@ public class DataDaoImpl implements DataDao {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public List getTripListByKeyWords(List<String> keyWords) throws Exception {	
+	public List<Trip> getTripListByKeyWords(List<String> keyWords) throws Exception {	
 		Set<Trip> resSet= new LinkedHashSet<Trip>();
 		session = sessionFactory.openSession();
 		tx = session.getTransaction();
@@ -136,7 +144,7 @@ public class DataDaoImpl implements DataDao {
 			resSet.addAll(listByDescription);
 			// dle tags
 			Query queryByTag = session.createQuery("Select t from Trip t JOIN t.tags tg where tg.tag like '%" + keyWord + "%'");
-			List<Trip> listByTag = queryByDescription.list();
+			List<Trip> listByTag = queryByTag.list();
 			resSet.addAll(listByTag);
 		}
 		tx.commit();
