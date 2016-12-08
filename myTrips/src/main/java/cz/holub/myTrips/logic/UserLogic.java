@@ -11,12 +11,17 @@ public class UserLogic {
 	@Autowired
 	DataDao dataDao;
 	
+	/**
+	 * Ovìøí zda uživatelské jmého a heslo odpovídají kombinaci uložené v DB.
+	 * @param userName
+	 * @param password
+	 * @return
+	 */
 	public boolean authenticateUser(String userName, String password) {
 		User user;
 		try {
 			user = dataDao.getUser(userName);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
@@ -28,6 +33,13 @@ public class UserLogic {
 		return true;
 	}
 	
+	/**
+	 * Vytvoøení hashe z plaintext hesla pomocí BCryptPasswordEncoder
+	 * takto vytvoøené hashe lze použít i pøi ovìøování pomocí spring security.
+	 * Sùl je souèástí hashe
+	 * @param plainTextPassword
+	 * @return
+	 */
 	public String encryptPassword(String plainTextPassword) {
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(plainTextPassword);

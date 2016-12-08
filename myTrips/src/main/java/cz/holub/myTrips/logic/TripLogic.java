@@ -11,6 +11,7 @@ import cz.holub.myTrips.dao.DataDao;
 import cz.holub.myTrips.domain.GPSPoint;
 import cz.holub.myTrips.domain.Tag;
 import cz.holub.myTrips.domain.Trip;
+import cz.holub.myTrips.serviceTools.AuthenticatedUser;
 import cz.holub.myTrips.serviceTools.Status;
 
 public class TripLogic {
@@ -78,16 +79,23 @@ public class TripLogic {
 	 * - oèísluje zbylé tagy <BR> 
 	 * - oèísluje gps souøadnice<BR> 
 	 * @param trip
+	 * @param authenticatedUser
 	 * @return true - pokud je vše v poøádku a záznam mùže být vložen do databáze,<BR> 
 	 * false - pokud záznam není v poøádku a nemá se ukládat do DB
 	 */
-	public Status prepareTripBeforeInsert(Trip trip) {
+	public Status prepareTripBeforeInsert(Trip trip, AuthenticatedUser authenticatedUser) {
 		Status res= null;
 		String tripId= generateUniqueTripId();
 		trip.setId(tripId);		
 		trip.setLenght(BigDecimal.ZERO);
 		
-		res= checkBeforeInsertUpdate(trip);
+		if (trip.getUserId() == null) {
+			if ((authenticatedUser != null) && (authenticatedUser.getUserName() != null)) {
+				trip.setUserId(authenticatedUser.getUserName());
+			}
+		}
+		
+		res= checkBeforeInsertUpdate(trip, authenticatedUser);
 		if (res.getCode() != Status.STATUS_SUCCESFULL) {
 			return res;
 		}
@@ -120,14 +128,12 @@ public class TripLogic {
 	 * Pøipraví záznam na aktualizaci.
 	 * Nejprve provede kontrolu, zda záznam nemá zakázaný obsah (pokud ano, vrátí chybný status a záznam neuloží).
 	 * Pokud je záznam v poøádku tak v øípadì nutnosti dooèísluje tagy a pozice a záznam uloží.
+	 * Vynuluje vypoèítanou délku tripu - musí se spoèítat znova.
 	 * @param trip
 	 * @return
 	 */
-	public Status prepareTripBeforeUpdate(Trip trip) {
-		Status res= checkBeforeInsertUpdate(trip);
-		if (res.getCode() != Status.STATUS_SUCCESFULL) {
-			return res;
-		}
+	public Status prepareTripBeforeUpdate(Trip trip, AuthenticatedUser authenticatedUser) {
+		trip.setLenght(BigDecimal.ZERO);
 		
 		boolean updateAnyTagNeeded= false;
 		int maxCount= 0;
@@ -168,19 +174,27 @@ public class TripLogic {
 			}
 		}
 		
-		return res;
+		return new Status(Status.STATUS_SUCCESFULL, "", null);
 	}
 	
 	
 	/**
 	 * Kontrola pøed uložením do databáze.
+	 * Pokud autentizovaný uživatel není majitelem výletu, vrací chybu
 	 * Pokud má zakázaný obsah Jméno nebo Popis tak vrací chybu,
 	 * pokud má zakázaný obsah tag, tak se smaže ze seznamu tagù ale chyba se nevyvolá.
 	 * @param trip
+	 * @param authenticatedUser
 	 * @return
 	 */
-	public Status checkBeforeInsertUpdate(Trip trip) {
+	public Status checkBeforeInsertUpdate(Trip trip, AuthenticatedUser authenticatedUser) {
 		Status res= null;
+		if ((authenticatedUser == null) || (authenticatedUser.getUserName() == null)) {
+			return new Status(Status.STATUS_EROR, "Zadny uzivatel neni prihlasen", trip.getId());
+		}
+		if (!authenticatedUser.getUserName().equals(trip.getUserId())) {
+			return new Status(Status.STATUS_EROR, "Vylet muze vkladat nebo opravovat jen jeho vlastnik", trip.getId());
+		}
 		if (hasStringBannedContent(trip.getName())) {
 			return new Status(Status.STATUS_EROR, "Name obsahuje zakazany obsah", trip.getId());
 		}
@@ -207,10 +221,10 @@ public class TripLogic {
 	}
 	
 	/**
-	 * Statická metoda pro výpoèet vzdálennosti mezi dvìma body
+	 * Statická metoda pro výpoèet vzdálenosti mezi dvìma body
 	 * @param point1 
 	 * @param point2
-	 * @return vzdálennost mezi 
+	 * @return vzdálenost mezi 
 	 */
 	public static double calculateDistanceOfTwoPoints(GPSPoint point1, GPSPoint point2) {
 		double lat1 = point1.getLat().doubleValue();
@@ -235,7 +249,7 @@ public class TripLogic {
 	public void calculateTripLenInThread(Trip trip) {
 		final DataDao myDataDao = dataDao;
 		final Trip myTrip = trip;
-
+		
 		Thread distanceCalculatorThread = new Thread() {
 			public void run() {
 				System.out.println("Zahajuju vypocet vzdalennosti");
@@ -251,7 +265,7 @@ public class TripLogic {
 					myTrip.setLenght(BigDecimal.ZERO);
 				}
 				try {
-					myDataDao.updateTrip(myTrip);
+					myDataDao.updateTripSimple(myTrip);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -264,4 +278,21 @@ public class TripLogic {
 		}
 	}
 
+	/**
+	 * Provìøí, zda uživatel který založil trip a je uložený v databázi, je shodný s autentizovaným uživatelem
+	 * @param trip
+	 * @param authenticatedUser
+	 * @return
+	 */
+	public boolean isOwnerAuthenticatedUser(String tripId, AuthenticatedUser authenticatedUser) {
+		String originalOwner= dataDao.getOriginalTripOwner(tripId);
+		if (originalOwner == null) {
+			return false;
+		}
+		if (originalOwner.equals(authenticatedUser.getUserName())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.holub.myTrips.dao.DataDao;
+import cz.holub.myTrips.domain.FavouriteTrip;
 import cz.holub.myTrips.domain.Trip;
 import cz.holub.myTrips.domain.User;
 import cz.holub.myTrips.logic.UserLogic;
@@ -40,21 +41,14 @@ public class MyTripController {
 		return listOfTrips;
 	}
 	
-	@RequestMapping(value = "/trip/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
-	public Trip gettripById(@PathVariable String id) {
-		try {
-			return dataDao.getTripById(id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	@RequestMapping(value = "/trips", method = RequestMethod.POST, headers = "Accept=application/json")
 	public Status addTrip(@RequestBody Trip trip) {
+		if (authenticatedUser == null) {
+			return new Status(Status.STATUS_EROR, "Pro vytvoreni vyletu musi byt uzivatel prihlasen", null);
+		}
 		Status res;
 		try {
-			res= dataDao.addTrip(trip);
+			res= dataDao.addTrip(trip, authenticatedUser);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -65,15 +59,40 @@ public class MyTripController {
 		return res;
 	}
 
+	@RequestMapping(value = "/trips", params= {"keywords"}, method = RequestMethod.GET, headers = "Accept=application/json")
+	public List<Trip> searchTrips(@RequestParam(value = "keywords")List<String> keyWords) {
+		List<Trip> listOfTrips = null;
+		try {
+			listOfTrips  = dataDao.getTripListByKeyWords(keyWords);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listOfTrips;
+	}
+
+
+	@RequestMapping(value = "/trip/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public Trip gettripById(@PathVariable String id) {
+		try {
+			return dataDao.getTripById(id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	@RequestMapping(value = "/trip/{id}", method = RequestMethod.PUT, headers = "Accept=application/json")
 	public Status updateTrip(@RequestBody Trip trip) {
+		if (authenticatedUser == null) {
+			return new Status(Status.STATUS_EROR, "Pro aktualizaci vyletu musi byt uzivatel prihlasen", null);
+		}
 		Status res;
 		try {
-			res= dataDao.updateTrip(trip);
+			res= dataDao.updateTrip(trip, authenticatedUser);
 			if (res.getCode() == Status.STATUS_SUCCESFULL) {
-				res.setMessage("Zaznam byl aktualizovan" +  res.getMessage());
+				res.setMessage("Zaznam byl aktualizovan " +  res.getMessage());
 			} else {
-				res.setMessage("Selhala aktualizace zaznamu" +  res.getMessage());				
+				res.setMessage("Selhala aktualizace zaznamu " +  res.getMessage());				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -86,17 +105,13 @@ public class MyTripController {
 
 	@RequestMapping(value = "/trip/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
 	public Status deletetrip(@PathVariable("id") String id) {
+		if (authenticatedUser == null) {
+			return new Status(Status.STATUS_EROR, "Pro vymaz vyletu musi byt uzivatel prihlasen", null);
+		}
 		Status res= new Status();
 		res.setTripId(id);
 		try {
-			if (dataDao.deleteTrip(id)) {
-				res.setCode(Status.STATUS_SUCCESFULL);
-				res.setMessage("Zaznam uspesne vymazan");
-			} else {
-				res.setCode(Status.STATUS_SUCCESFULL);
-				res.setMessage("Zaznam nebyl nalezen");				
-			}
-			
+			res= dataDao.deleteTrip(id, authenticatedUser);
 		} catch (Exception e) {
 			e.printStackTrace();
 			res.setCode(Status.STATUS_EROR);
@@ -106,17 +121,6 @@ public class MyTripController {
 		return res;
 	}
 	
-	@RequestMapping(value = "/trips", params= {"keywords"}, method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<Trip> searchTrips(@RequestParam(value = "keywords")List<String> keyWords) {
-		List<Trip> listOfTrips = null;
-		try {
-			listOfTrips  = dataDao.getTripListByKeyWords(keyWords);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return listOfTrips;
-	}
-
 	@RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")
 	public Status addUser(@RequestBody User user) {
 		Status res;
@@ -144,11 +148,39 @@ public class MyTripController {
 				res.setCode(Status.STATUS_SUCCESFULL);
 				res.setMessage("Uživatel " + login.getUserName() + " byl autentizován");
 			} else {
+				authenticatedUser= null;
 				res.setCode(Status.STATUS_EROR);
 				res.setMessage("Uživatel "+ login.getUserName() + " nebyl autentizován");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	@RequestMapping(value = "/favouriteTrips", method = RequestMethod.GET, headers = "Accept=application/json")
+	public List<FavouriteTrip> getFavouriteTrips() {
+		List<FavouriteTrip> listOfFavouriteTrips = null;
+		try {
+			listOfFavouriteTrips = (List<FavouriteTrip>)dataDao.getFavouriteTripList(authenticatedUser);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listOfFavouriteTrips;
+	}
+	
+
+	@RequestMapping(value = "/favouriteTrips", method = RequestMethod.POST, headers = "Accept=application/json")
+	public Status addFavouriteTrip(@RequestBody FavouriteTrip favouriteTrip) {
+		Status res;
+		try {
+			res= dataDao.addFavouriteTrip(favouriteTrip, authenticatedUser);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			res= new Status();
+			res.setCode(Status.STATUS_EROR);
+			res.setMessage("Selhalo pridani zaznamu. Vyvolana vyjimka.");
 		}
 		return res;
 	}

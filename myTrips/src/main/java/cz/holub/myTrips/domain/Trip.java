@@ -38,6 +38,9 @@ public class Trip implements Serializable {
 
 	@Column(name = "lenght", precision=20, scale=6)
 	BigDecimal lenght;
+	
+	@Column(name = "userId", length = 10, nullable = false)
+	private String userId;
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(orphanRemoval=true, cascade= CascadeType.ALL, fetch= FetchType.EAGER)
@@ -79,6 +82,14 @@ public class Trip implements Serializable {
 
 	public void setLenght(BigDecimal len) {
 		this.lenght = len;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public List<Tag> getTags() {

@@ -53,4 +53,5 @@
 	<bean id="tripLogic" class="cz.holub.myTrips.logic.TripLogic"></bean>
 	<bean id="tagLogic" class="cz.holub.myTrips.logic.TagLogic"></bean>
 	<bean id="userLogic" class="cz.holub.myTrips.logic.UserLogic"></bean>
+	<bean id="favouriteTripLogic" class="cz.holub.myTrips.logic.FavouriteTripLogic"></bean>
 </beans>

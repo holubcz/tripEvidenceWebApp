@@ -2,21 +2,24 @@ package cz.holub.myTrips.dao;
 
 import java.util.List;
 
+import cz.holub.myTrips.domain.FavouriteTrip;
 import cz.holub.myTrips.domain.Trip;
 import cz.holub.myTrips.domain.User;
+import cz.holub.myTrips.serviceTools.AuthenticatedUser;
 import cz.holub.myTrips.serviceTools.Status;
 
 public interface DataDao {
 	/**
-	 * Pøidá záznam do databáze.
+	 * Pøidá záznam Tripu do databáze.
 	 * Pøed vlastním pøidáním vyvolá jeho validaci. 
 	 * Pokud validace neprobìhne úspìšnì, záznam se do databáze nevloží a 
 	 * vrátí se status s chybovým stavem a textovým popisem chyby.
 	 * @param trip záznam pro vložení
+	 * @param authenticatedUser pøihlášený uživatel - pro provedení kontrol
 	 * @return Status s informací zda vložení probìhlo v poøádku nebo ne
 	 * @throws Exception 
 	 */
-	public Status addTrip(Trip trip) throws Exception;
+	public Status addTrip(Trip trip, AuthenticatedUser authenticatedUser) throws Exception;
 
 	/**
 	 * Aktualizuje záznam v databázi.
@@ -25,7 +28,16 @@ public interface DataDao {
 	 * @return Status s informací zda aktualizace probìhla v poøádku nebo ne
 	 * @throws Exception
 	 */
-	public Status updateTrip(Trip trip) throws Exception;
+	public Status updateTrip(Trip trip, AuthenticatedUser authenticatedUser) throws Exception;
+
+	/**
+	 * Provede aktualizaci tripu bez kontrol. 
+	 * Slouží k uložení délky po jejím výpoètu v samostatném tjreadu
+	 * @param trip
+	 * @return
+	 * @throws Exception
+	 */
+	public void updateTripSimple(Trip trip) throws Exception;
 
 	/**
 	 * Získá trip z db podle jeho id
@@ -55,10 +67,11 @@ public interface DataDao {
 	/**
 	 * smaže zvolený trip z DB
 	 * @param id
+	 * @param authenticatedUser
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean deleteTrip(String id) throws Exception;
+	public Status deleteTrip(String id, AuthenticatedUser authenticatedUser) throws Exception;
 
 	/**
 	 * Ovìøí zda existuje ID Tripu v databázi nebo ne
@@ -98,4 +111,33 @@ public interface DataDao {
 	 * @throws Exception
 	 */
 	public User getUser(String userName) throws Exception;
+
+	/**
+	 * vrací seznam všech oblíbených tripù pro zadaného uživatele
+	 * @param authenticatedUser
+	 * @return
+	 * @throws Exception
+	 */
+	public List<FavouriteTrip> getFavouriteTripList(AuthenticatedUser authenticatedUser) throws Exception;
+
+	/**
+	 * Pøidá záznam Oblíbeného tripu do databáze.
+	 * Pøed pøidání ovìøí zda uživatel v oblíbeném tripu je shodný s autentizovaným.
+	 * pokud ne tak jej nahradí (pouze autentizovaný uživatel mùže vkládat oblíbené, a mùže je vkládat jen sobì)
+	 * Následnì ovìøí zda už oblíbený trip v db není a pokud ne tak jej uloží.
+	 * @param trip záznam pro vložení
+	 * @param authenticatedUser aktuální autentizovaný uživatel (pøi použití spring security nebude potøeba)
+	 * @return Status s informací zda vložení probìhlo v poøádku nebo ne
+	 * @throws Exception 
+	 */
+	public Status addFavouriteTrip(FavouriteTrip favouriteTrip, AuthenticatedUser authenticatedUser) throws Exception;
+
+	/**
+	 * Vrací pùvodního vlastníka tripu který je uložený v db.
+	 * slouží ke kontrolám pøed aktualizací a výmazem tripu
+	 * @param tripId
+	 * @return
+	 */
+	public String getOriginalTripOwner(String tripId);
 }
+
